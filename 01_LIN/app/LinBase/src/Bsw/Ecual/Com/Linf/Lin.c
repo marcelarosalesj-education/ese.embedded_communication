@@ -131,10 +131,29 @@ void Lin_CalculateChecksum(LinSync* sync)
 void Lin_Init ( const LinConfigType* Config)
 {
   LinNumChannels = Config->LinNumberOfChannels;
-  LinChannelId = Config->LinChannel->LinChannelId;
-  LinBaudrate = Config->LinChannel->LinChannelBaudrate;
-
- 
+  
+  UartChannelType UartChannelConfig[LinNumChannels];
+  int i=0;
+  for(i = 0; i < LinNumChannels; i++) {
+     UartChannelConfig[i].ChannelId = Config->LinChannel[i].LinChannelId;;
+     UartChannelConfig[i].IsrEn = UART_CFG_INT_OVR_ERROR;
+     UartChannelConfig[i].Mode = UART_CFG_MODE_LOOPBACK;
+     UartChannelConfig[i].Parity = UART_CFG_PARITY_NO;
+     UartChannelConfig[i].Baudrate = Config->LinChannel[i].LinChannelBaudrate;;
+     UartChannelConfig[i].TxNotification = NULL;
+     UartChannelConfig[i].RxNotification = NULL;
+     UartChannelConfig[i].ErrorNotification = NULL;
+  }
+  
+  UartConfigType UartCfg[] = { 
+    {
+      sizeof(UartChannelConfig)/sizeof(UartChannelType), //number of channels
+      UART_CFG_PER_CLK,
+      &UartChannelConfig[0]
+    }
+  } ;
+   
+  Uart_Init(&UartCfg[0]);
 }
 
 

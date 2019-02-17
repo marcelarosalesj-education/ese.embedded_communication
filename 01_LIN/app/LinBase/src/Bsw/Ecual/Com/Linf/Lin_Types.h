@@ -38,7 +38,7 @@
     LinFrameCsModelType Cs;
     LinFrameResponseType Drc;
     LinFrameDlType Dl;
-    uint8_t SduPtr;
+    uint8_t* SduPtr;
   } LinPduType;
 
 /*============================================================================*/
