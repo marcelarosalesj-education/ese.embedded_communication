@@ -2,11 +2,11 @@
 /**
   \mainpage
   \n 
-  \brief        Main application (main module)
-  \author       Abraham Tezmol Otero, M.S.E.E
-  \project      Tau 
-  \version      1.0
-  \date         12/Jun/2016
+  \brief        Lin example
+  \author       
+  \project       
+  \version      
+  \date         
    
   Program compiled with  WinIDEA Open Build 9.12.256 (54401), tested on Atmel SAMV71 Xplained Ultra
 */
@@ -27,6 +27,8 @@
 #include    "Button_Ctrl.h"
 /** Uart interfaces */
 #include    "Uart.h"
+/** Lin interfaces */
+#include    "Lin.h"
 
 
 /*~~~~~~  Local definitions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
@@ -58,13 +60,12 @@ extern int main( void )
 	printf( "-- Led Control --\n\r" ) ;
 	LedCtrl_Configure();
   
-    printf( "-- Button Control --\n\r" ) ;  
-    ButtonCtrl_ConfigureSW0Button();
-  
-    /* Uart Inititalization */
-    printf( "-- Uart Initialization --\n\r" ) ;
-    Uart_Init(&UartCfg[0]);
-  
+  printf( "-- Button Control --\n\r" ) ;  
+  ButtonCtrl_ConfigureSW0Button();
+
+  /* Uart Inititalization */
+  printf( "-- Lin Initialization --\n\r" ) ;
+  Lin_Init(&LinChannelConfig[0]);
   
 	/* Scheduler Inititalization */
 	printf( "-- Scheduler Initialization --\n\r" ) ;

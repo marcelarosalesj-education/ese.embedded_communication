@@ -24,7 +24,7 @@
 		TASK_10MS,
 		TASK_50MS,
 		TASK_100MS,
-        TASK_SW0,
+    TASK_SW0,
 		TASK_BKG,
 	}SchMTaskIdType;
 	
@@ -41,6 +41,6 @@
 		SchMTaskType * TaskCfg;
 	}SchMCfgType;
 
-    extern SchMCfgType ScheduleConfig[];
+  extern SchMCfgType ScheduleConfig[];
 
 #endif /* _SCHM_CFG_H */
