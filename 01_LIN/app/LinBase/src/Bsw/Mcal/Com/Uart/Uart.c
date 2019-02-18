@@ -94,12 +94,12 @@ void Uart_Init( const UartConfigType* Config )
 	/* Reference to the physical channel with PhyChIdx */
 	PhyChIdx = Config->UartChannel[LocChIdx].ChannelId;
 	
-    /* Point to register address based of physical channel */
-    LocUartReg = UartRegAddr[PhyChIdx];
-	
-    /* Access to register for the configured channel with LocUartReg */
-    /* Access to channel status structure with LocChIdx */
-    UartStatus[LocChIdx].ChannelId = PhyChIdx;
+  /* Point to register address based of physical channel */
+  LocUartReg = UartRegAddr[PhyChIdx];
+
+  /* Access to register for the configured channel with LocUartReg */
+  /* Access to channel status structure with LocChIdx */
+  UartStatus[LocChIdx].ChannelId = PhyChIdx;
   
   UartStatus[LocChIdx].tx_callback = Config->UartChannel[LocChIdx].TxNotification;
   UartStatus[LocChIdx].rx_callback = Config->UartChannel[LocChIdx].RxNotification;
