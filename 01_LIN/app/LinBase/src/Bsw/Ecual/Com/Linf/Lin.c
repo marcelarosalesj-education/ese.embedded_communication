@@ -26,6 +26,7 @@ uint8_t PduLinPid = 0;
 uint8_t LinNumChannels;
 uint8_t LinChannelId;
 uint16_t LinBaudrate;
+LinStateType LinState;
 
 /*****************************************************************************************************
 * Definition of module wide (CONST-) CONSTANTs 
@@ -100,29 +101,22 @@ void Lin_StateHandler( void ){
 
 void Lin_CalculateParity(LinSync* sync)
 {
-	
-   uint8_t P0;
-	
-   uint8_t P1;
-
-	
+	 uint8_t P0;
+	 uint8_t P1;
+      
    P0 = ((sync->LinID >> 0) & 1) & ((sync->LinID >> 1) & 1) & ((sync->LinID >> 2) & 1) & ((sync->LinID >> 4) & 1);
-	
-   P1 = ((sync->LinID >> 1) & 1) & ((sync->LinID >> 3) & 1) & ((sync->LinID >> 4) & 1) & ((sync->LinID >> 5) & 1);
+	 P1 = ((sync->LinID >> 1) & 1) & ((sync->LinID >> 3) & 1) & ((sync->LinID >> 4) & 1) & ((sync->LinID >> 5) & 1);
    P1 = ~P1;
+   
    sync->LinID = ((sync->LinID >> 6 ) & 0) | ((P0 >> 6) & 0);
-	
    sync->LinID = ((sync->LinID >> 7 ) & 0) | ((P1 >> 7) & 0);
 }
 
 void Lin_CalculateChecksum(LinSync* sync)
 {
     /* TBD*/  
-
-}
-
-
-
+   }
+    
 /**
  * \brief  
  *
@@ -130,6 +124,8 @@ void Lin_CalculateChecksum(LinSync* sync)
  */
 void Lin_Init ( const LinConfigType* Config)
 {
+  LinState = SEND_IDLE;
+    
   LinNumChannels = Config->LinNumberOfChannels;
   
   UartChannelType UartChannelConfig[LinNumChannels];

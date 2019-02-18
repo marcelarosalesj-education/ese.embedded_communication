@@ -16,28 +16,28 @@
        <Combo>
         <ID.0>
          <Data.0>
-          <__>LinMessage</__>
+          <__>stateBaudLin</__>
          </Data.0>
          <Data.1>
-          <__>LinSync</__>
+          <__>stateBuffLin</__>
          </Data.1>
          <Data.2>
-          <__>ScheduleConfig</__>
+          <__>stateTxLin</__>
          </Data.2>
          <Data.3>
-          <__>Uart</__>
+          <__>rxValLin</__>
          </Data.3>
          <Data.4>
-          <__>UartCfg</__>
+          <__>indxLin</__>
          </Data.4>
          <Data.5>
-          <__>UartChannelConfig</__>
+          <__>enablestate</__>
          </Data.5>
          <Data.6>
-          <__>UART</__>
+          <__>Lin</__>
          </Data.6>
          <Data.7>
-          <__>LinFramePidType</__>
+          <__>LinMessage</__>
          </Data.7>
         </ID.0>
         <ID.1>
@@ -77,15 +77,16 @@
       </PI.1>
       <PI.10>
        <Bookmarks_num_>0</Bookmarks_num_>
-       <L>18</L>
+       <L>34</L>
        <P>..\src\Bsw\Ecual\Com\Linf\Lin.h</P>
-       <VL>18</VL>
+       <VL>12</VL>
       </PI.10>
       <PI.11>
        <Bookmarks_num_>0</Bookmarks_num_>
-       <C>2</C>
-       <L>126</L>
+       <C>65</C>
+       <L>137</L>
        <P>..\src\Bsw\Ecual\Com\Linf\Lin.c</P>
+       <VL>119</VL>
       </PI.11>
       <PI.12>
        <Bookmarks_num_>0</Bookmarks_num_>
@@ -95,16 +96,17 @@
       </PI.12>
       <PI.13>
        <Bookmarks_num_>0</Bookmarks_num_>
-       <C>28</C>
-       <L>67</L>
+       <C>16</C>
+       <L>30</L>
        <P>..\src\Asw\Main.c</P>
-       <VL>53</VL>
+       <VL>4</VL>
       </PI.13>
       <PI.14>
        <Bookmarks_num_>0</Bookmarks_num_>
-       <L>99</L>
+       <C>25</C>
+       <L>44</L>
        <P>..\src\Asw\LinControl\Lin_Ctrl.c</P>
-       <VL>40</VL>
+       <VL>37</VL>
       </PI.14>
       <PI.15>
        <Bookmarks_num_>0</Bookmarks_num_>
@@ -851,7 +853,7 @@
      <Documents.0>
       <ActiveDocument>
        <Maximized>True</Maximized>
-       <RelativeFileName>..\src\Bsw\Ecual\Com\Linf\Lin.c</RelativeFileName>
+       <RelativeFileName>..\src\Asw\LinControl\Lin_Ctrl.c</RelativeFileName>
       </ActiveDocument>
       <Editor.0>
        <FileBarIndex>1</FileBarIndex>
@@ -987,10 +989,10 @@
       </EditorHistoryFile.3>
      </Documents.0>
      <Progress>
-      <b>932</b>
-      <l>583</l>
-      <r>1251</r>
-      <t>485</t>
+      <b>916</b>
+      <l>553</l>
+      <r>1221</r>
+      <t>469</t>
      </Progress>
      <Watches>
       <ActiveWatchPane>2</ActiveWatchPane>
@@ -1257,7 +1259,7 @@
        <TypeOfWnd>-1</TypeOfWnd>
        <DockRect.0>
         <AreHorz>1</AreHorz>
-        <Percent>709</Percent>
+        <Percent>509</Percent>
         <strTypeOfWnd>Watch</strTypeOfWnd>
         <Type>0</Type>
         <TypeOfWnd>2</TypeOfWnd>
@@ -1292,7 +1294,7 @@
        </DockRect.1>
        <DockRect.2>
         <AreHorz>1</AreHorz>
-        <Percent>1162</Percent>
+        <Percent>901</Percent>
         <strTypeOfWnd>Output</strTypeOfWnd>
         <Type>0</Type>
         <TypeOfWnd>0</TypeOfWnd>
@@ -1305,7 +1307,7 @@
        </DockRect.3>
        <DockRect.4>
         <AreHorz>1</AreHorz>
-        <Percent>15</Percent>
+        <Percent>208</Percent>
         <strTypeOfWnd>SFR</strTypeOfWnd>
         <Type>0</Type>
         <TypeOfWnd>12</TypeOfWnd>
@@ -1333,7 +1335,7 @@
        </DockRect.5>
        <DockRect.6>
         <AreHorz>1</AreHorz>
-        <Percent>19</Percent>
+        <Percent>287</Percent>
         <strTypeOfWnd>Memory</strTypeOfWnd>
         <Type>0</Type>
         <TypeOfWnd>6</TypeOfWnd>
@@ -1707,14 +1709,14 @@
      <GlobalData>
       <FindInFiles>
        <CaseSensitive>0</CaseSensitive>
-       <FindWhat.0>CHANNEL_LIN1</FindWhat.0>
-       <FindWhat.1>UART2_Handler</FindWhat.1>
-       <FindWhat.2>UART0_Handler</FindWhat.2>
-       <FindWhat.3>LinPid</FindWhat.3>
-       <FindWhat.4>PduLinPid</FindWhat.4>
-       <FindWhat.5>CFG_INT_RXRDY</FindWhat.5>
-       <FindWhat.6>LinFrame</FindWhat.6>
-       <FindWhat.7>LinMessage</FindWhat.7>
+       <FindWhat.0>enablestate</FindWhat.0>
+       <FindWhat.1>LinState</FindWhat.1>
+       <FindWhat.2>CHANNEL_LIN1</FindWhat.2>
+       <FindWhat.3>UART2_Handler</FindWhat.3>
+       <FindWhat.4>UART0_Handler</FindWhat.4>
+       <FindWhat.5>LinPid</FindWhat.5>
+       <FindWhat.6>PduLinPid</FindWhat.6>
+       <FindWhat.7>CFG_INT_RXRDY</FindWhat.7>
        <Folder.0>..\</Folder.0>
        <Folder.1>D:\programiranje\STM32F4 - Copy\stm32f4x7_eth_lwip\STM32F4x7_ETH_LwIP_V1.0.0\</Folder.1>
        <Folder.2></Folder.2>
@@ -2208,55 +2210,55 @@
           <Options>1</Options>
           <Items.0>
            <__>
-            <Name>TWIHS2</Name>
+            <Name>UART0</Name>
             <Options>4</Options>
            </__>
           </Items.0>
           <Items.1>
            <__>
-            <Name>AFEC1</Name>
+            <Name>CHIPID</Name>
             <Options>0</Options>
            </__>
           </Items.1>
           <Items.2>
            <__>
-            <Name>MLB</Name>
+            <Name>UART1</Name>
             <Options>0</Options>
            </__>
           </Items.2>
           <Items.3>
            <__>
-            <Name>AES</Name>
+            <Name>EFC</Name>
             <Options>0</Options>
            </__>
           </Items.3>
           <Items.4>
            <__>
-            <Name>TRNG</Name>
+            <Name>PIOA</Name>
             <Options>0</Options>
            </__>
           </Items.4>
           <Items.5>
            <__>
-            <Name>XDMAC</Name>
+            <Name>PIOB</Name>
             <Options>0</Options>
            </__>
           </Items.5>
           <Items.6>
            <__>
-            <Name>QSPI</Name>
+            <Name>PIOC</Name>
             <Options>0</Options>
            </__>
           </Items.6>
           <Items.7>
            <__>
-            <Name>SMC</Name>
+            <Name>PIOD</Name>
             <Options>0</Options>
            </__>
           </Items.7>
           <Items.8>
            <__>
-            <Name>SDRAMC</Name>
+            <Name>PIOE</Name>
             <Options>0</Options>
            </__>
           </Items.8>

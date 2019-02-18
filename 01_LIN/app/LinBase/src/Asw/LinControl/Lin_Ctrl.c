@@ -40,14 +40,9 @@
 * Definition of module wide (CONST-) CONSTANTs 
 *****************************************************************************************************/
 
-uint8_t messageBuff1[] = "La tierra es redonda";
-uint8_t messageBuff2[] = "EMBEDDED SYSTEMS RULES";
-uint8_t indxLin = 0;
-uint8_t rxValLin = 0;
-uint8_t enablestate = true;
-uint8_t stateTxLin = 0;
+uint8_t messageBuffLin1[] = "La tierra es redonda";
+uint8_t messageBuffLin2[] = "EMBEDDED SYSTEMS RULES";
 uint8_t stateBuffLin = 0;
-uint8_t stateBaudLin =0;
 
 /****************************************************************************************************
 * Code of module wide FUNCTIONS
@@ -60,7 +55,7 @@ void LinCtrl_2ms( void )
       LIN_ENHANCED_CS,
       LIN_MASTER_RESPONSE,
       20,
-      messageBuff1,
+      messageBuffLin1,
   };
   
   stateBuffLin = Lin_SendFrame(LIN2_ctrl, &pduInfo);
@@ -83,7 +78,7 @@ void LinCtrl_100ms( void )
       LIN_CLASSIC_CS,
       LIN_SLAVE_RESPONSE,
       22,
-      messageBuff2,
+      messageBuffLin2,
   };
   
   stateBuffLin = Lin_SendFrame(LIN4_ctrl, &pduInfo);
