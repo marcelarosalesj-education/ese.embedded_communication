@@ -55,7 +55,7 @@ void LinCtrl_2ms( void )
       LIN_ENHANCED_CS,
       LIN_MASTER_RESPONSE,
       14,
-      messageBuffLin1,
+      &messageBuffLin1[0],
   };
   
   stateBuffLin = Lin_SendFrame(LIN2_ctrl, &pduInfo);

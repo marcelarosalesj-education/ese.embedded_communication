@@ -23,6 +23,7 @@
 *****************************************************************************************************/
 
 uint8_t PduLinPid = 0;
+LinFrameDlType SduDataLength = 0;
 uint8_t LinNumChannels;
 uint8_t LinChannelId;
 uint32_t LinBaudrate;
@@ -100,9 +101,19 @@ void Lin_StateHandler( void ){
   }          
 }
 
-void Lin_CalculateChecksum(LinFramePidType id)
+uint8_t Lin_CalculateChecksum(LinFrameCsModelType CStype, LinFramePidType pid, uint8_t * Data)
 {
-    /* TBD*/
+    if(CStype == LIN_CLASSIC_CS)
+    {
+      /**/
+    }
+    else if (CStype == LIN_ENHANCED_CS)
+    {
+      /**/
+    } else
+    {
+      /*Invalid Checksum Type*/
+    }
 }
 
 LinFramePidType Lin_CalculatePID(LinFramePidType id)
@@ -162,21 +173,20 @@ void Lin_Init ( const LinConfigType* Config)
  */
 Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
 {
-    uint8_t LinPid = PduInfoPtr->Pid;
     if( LinState == IDLE){
-  	  PduLinPid = LinPid;
-  	  /*
-  		To consider in the Lin project. Prepare the data to be handled while the Lin frame is in progress
-  		in addition to back up the Lin Pid, you will need to back up the ResponseType, Sdu, etc.
-  		for (uint8_t SduIdx = 0; SduIdx < SduDataLength; SduIdx++)
-  		{
-  			SduData[SduIdx] = LinSduPtr[SduIdx]; It is important to backup the Sdu to avoid data corrupted by higher layers. Remember, SduPtr contains a data address whose data is not under our control.
-  		}
-  		DataSentCtrlCounter = 0; -> Will handle the data to be sent if a master response, or to store the data in the corresponding order if a slave response
-  		
-  	  */
+      PduLinPid = PduInfoPtr->Pid;
+      SduDataLength = PduInfoPtr->Dl;
+      uint8_t SduIdx = 0;
+      uint8_t SduData[SduDataLength];
+      for (SduIdx = 0; SduIdx < SduDataLength; SduIdx++)
+      {
+        SduData[SduIdx] = PduInfoPtr->SduPtr[SduIdx];
+      }
+      uint8_t DataSentCtrlCounter = 0;
       LinFramePidType PID;
-      PID = Lin_CalculatePID(LinPid);
+      uint8_t CS;
+      PID = Lin_CalculatePID(PduLinPid);
+      CS = Lin_CalculateChecksum(PduInfoPtr->Cs, PID, &SduData[0]); /* Checksum is calculated on the PID, with parity */
   	  LinState = SEND_BREAK;
   	  Lin_StateHandler();
     }
