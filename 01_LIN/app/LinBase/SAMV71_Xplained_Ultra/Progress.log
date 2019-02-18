@@ -2,6 +2,9 @@ CONVERTING	C:\Repos\embedded_communication\01_LIN\app\LinBase\SAMV71_Xplained_Ul
 LOADING	C:\Repos\embedded_communication\01_LIN\app\LinBase\SAMV71_Xplained_Ultra\Debug\LinBase.elf
 ANALYZING
 ANALYZING
-INITIALIZING	Emulator: CMSIS-DAP  ... PLEASE WAIT ...
 EMULATION	POD: Cortex (JTAG,SWD)   CPU: Cortex-M7
 DEBUG	PROTOCOL: SWD; RESET: SoC
+PROGRAMMING 	44352 bytes
+UMI INFO	Loading UMI monitor...
+PROGRAMMING	Atmel ATSAMV7 (2048 kB) (3 sectors)
+UMI INFO	Unloading UMI monitor...

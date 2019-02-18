@@ -25,7 +25,7 @@
 uint8_t PduLinPid = 0;
 uint8_t LinNumChannels;
 uint8_t LinChannelId;
-uint16_t LinBaudrate;
+uint32_t LinBaudrate;
 LinStateType LinState;
 
 /*****************************************************************************************************

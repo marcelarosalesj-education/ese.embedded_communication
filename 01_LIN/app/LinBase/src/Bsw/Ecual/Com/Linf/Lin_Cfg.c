@@ -11,15 +11,18 @@
 
 #include "Lin.h"
 
-#define CHANNEL_LIN1      1
-#define BAUDRATE_9600     9600
-
-LinChannelType LinCh =   {
-    CHANNEL_LIN1,
-    BAUDRATE_9600,
-  };
+LinChannelType LinCh[] = {
+  {
+    CHANNEL_LIN4,
+    BAUDRATE_115200,
+  },
+  {
+    CHANNEL_LIN2,
+    BAUDRATE_115200,
+  },
+};
 
 LinConfigType LinChannelConfig[] = {
-  1,
-  &LinCh,
+  sizeof(LinCh)/sizeof(LinChannelType), //number of channels
+  &LinCh[0],
 };

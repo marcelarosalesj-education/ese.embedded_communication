@@ -13,10 +13,18 @@
 
   #include "Lin.h"
 
+  #define CHANNEL_LIN1      1
+  #define CHANNEL_LIN2      2
+  #define CHANNEL_LIN3      3
+  #define CHANNEL_LIN4      4
+  #define CHANNEL_LIN5      5
+  #define BAUDRATE_9600     9600
+  #define BAUDRATE_115200   115200
+
   typedef struct
   {
     uint8_t LinChannelId;
-    uint16_t LinChannelBaudrate;
+    uint32_t LinChannelBaudrate;
   }LinChannelType;
 
   typedef struct

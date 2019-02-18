@@ -50,7 +50,7 @@ void SchM_Task_1ms( void )
 /* List of tasks to be executed @ 2ms, first group */
 void SchM_Task_2ms_A(void)
 {
-  /*LinCtrl_2ms();*/		
+  LinCtrl_2ms();
 }
 
 /* List of tasks to be executed @ 2ms, second group */
@@ -74,12 +74,13 @@ void SchM_Task_50ms( void )
 /* List of tasks to be executed @ 100ms */
 void SchM_Task_100ms( void )
 { 
-  /*LinCtrl_100ms();*/
+  LinCtrl_100ms();
 }
 
 /* List of tasks to be executed @ SW0 */
 void SchM_Task_SW0( void )
 {
   LedCtrl_ToogleBlinkingPattern();
+  LinCtrl_100ms();
   /*LinCtrl_TriggerEvent();*/
 }
