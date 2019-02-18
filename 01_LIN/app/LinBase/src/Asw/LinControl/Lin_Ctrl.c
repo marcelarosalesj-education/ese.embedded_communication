@@ -40,8 +40,8 @@
 * Definition of module wide (CONST-) CONSTANTs 
 *****************************************************************************************************/
 
-uint8_t messageBuffLin1[] = "Primer Mensaje";
-uint8_t messageBuffLin2[] = "Segundo Mensaje";
+uint8_t messageBuffLin1[] = "Segundo Mensaje";
+uint8_t messageBuffLin2[] = "ABCD";
 uint8_t stateBuffLin = 0;
 
 /****************************************************************************************************
@@ -52,9 +52,9 @@ void LinCtrl_2ms( void )
 {
    LinPduType pduInfo = {
       9,
-      LIN_ENHANCED_CS,
+      LIN_CLASSIC_CS,
       LIN_MASTER_RESPONSE,
-      14,
+      sizeof(messageBuffLin1)-1, /* minus one to remove the null termination character */
       &messageBuffLin1[0],
   };
   
@@ -77,8 +77,8 @@ void LinCtrl_100ms( void )
       5,
       LIN_CLASSIC_CS,
       LIN_SLAVE_RESPONSE,
-      15,
-      messageBuffLin2,
+      sizeof(messageBuffLin2)-1, /* minus one to remove the null termination character */
+      &messageBuffLin2[0],
   };
   
   stateBuffLin = Lin_SendFrame(LIN4_ctrl, &pduInfo);

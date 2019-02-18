@@ -101,19 +101,48 @@ void Lin_StateHandler( void ){
   }          
 }
 
-uint8_t Lin_CalculateChecksum(LinFrameCsModelType CStype, LinFramePidType pid, uint8_t * Data)
+uint8_t Lin_CalculateChecksum(LinFrameCsModelType CStype, LinFramePidType pid, uint8_t * Data, uint8_t length)
 {
+    printf(Data);
+    printf("\n\r");
+
+    /* Sum all Data */
+    uint16_t sum = 0;
+    uint8_t index = 0;
+    for(index = 0; index < length; index++)
+    {
+      sum += Data[index];
+    }
+
+    /* Add Pid if it is an Enhanced Checksum */
     if(CStype == LIN_CLASSIC_CS)
     {
-      /**/
+      /* do nothing */
     }
     else if (CStype == LIN_ENHANCED_CS)
     {
-      /**/
-    } else
+      sum += pid;
+    }
+    else
     {
       /*Invalid Checksum Type*/
     }
+
+    /* Handle Carry */
+    if (sum >= 0x0100 )
+    {
+      uint8_t low = (sum & 0x00FF);
+      uint8_t high = (sum & 0xFF00) >> 8;
+      sum = low + high;
+    }
+
+    /* One's complement */
+    sum = ~sum;
+
+    /* Clean MSB, they're not needed */
+    sum = sum & 0x00FF;
+
+    return sum;
 }
 
 LinFramePidType Lin_CalculatePID(LinFramePidType id)
@@ -176,18 +205,25 @@ Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
     if( LinState == IDLE){
       PduLinPid = PduInfoPtr->Pid;
       SduDataLength = PduInfoPtr->Dl;
+      LinFrameCsModelType ChecksumType = PduInfoPtr->Cs;
+
       uint8_t SduIdx = 0;
       uint8_t SduData[SduDataLength];
       for (SduIdx = 0; SduIdx < SduDataLength; SduIdx++)
       {
         SduData[SduIdx] = PduInfoPtr->SduPtr[SduIdx];
       }
+
       uint8_t DataSentCtrlCounter = 0;
       LinFramePidType PID;
       uint8_t CS;
       PID = Lin_CalculatePID(PduLinPid);
-      CS = Lin_CalculateChecksum(PduInfoPtr->Cs, PID, &SduData[0]); /* Checksum is calculated on the PID, with parity */
-  	  LinState = SEND_BREAK;
+      printf("PID is %d\n\r", PID);
+
+      printf("Data Length is %d\n\r", SduDataLength);
+      CS = Lin_CalculateChecksum(ChecksumType, PID, SduData, SduDataLength); /* Checksum is calculated on the PID, with parity */
+      printf("Checksum is %x\n\r", CS);
+      LinState = SEND_BREAK;
   	  Lin_StateHandler();
     }
     else{
