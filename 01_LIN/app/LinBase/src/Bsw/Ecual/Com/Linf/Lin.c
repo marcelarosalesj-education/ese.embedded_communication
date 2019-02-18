@@ -57,10 +57,12 @@ void Lin_StateHandler( void ){
 		  Uart_SendByte(0,0x00);
 		  Uart_EnableInt(0, UART_CFG_INT_TXRDY, 1);
 		  LinState = SEND_SYNC;
+      Lin_StateHandler();
 		  break;
 		case SEND_SYNC:
 		  Uart_SendByte(0,0x55);
 		  LinState = SEND_PID;
+      Lin_StateHandler();
 		  break;
 		case SEND_PID:
 		  /* For the Lin project, you might need to calculate the PID */
@@ -98,25 +100,24 @@ void Lin_StateHandler( void ){
   }          
 }
 
-
-void Lin_CalculateParity(LinSync* sync)
+void Lin_CalculateChecksum(LinFramePidType id)
 {
-	 uint8_t P0;
-	 uint8_t P1;
-      
-   P0 = ((sync->LinID >> 0) & 1) & ((sync->LinID >> 1) & 1) & ((sync->LinID >> 2) & 1) & ((sync->LinID >> 4) & 1);
-	 P1 = ((sync->LinID >> 1) & 1) & ((sync->LinID >> 3) & 1) & ((sync->LinID >> 4) & 1) & ((sync->LinID >> 5) & 1);
-   P1 = ~P1;
-   
-   sync->LinID = ((sync->LinID >> 6 ) & 0) | ((P0 >> 6) & 0);
-   sync->LinID = ((sync->LinID >> 7 ) & 0) | ((P1 >> 7) & 0);
+    /* TBD*/
 }
 
-void Lin_CalculateChecksum(LinSync* sync)
+LinFramePidType Lin_CalculatePID(LinFramePidType id)
 {
-    /* TBD*/  
-   }
-    
+  uint8_t P0;
+  uint8_t P1;
+  P0 = ((id >> 0) & 1) ^ ((id >> 1) & 1) ^ ((id >> 2) & 1) ^ ((id >> 4) & 1);
+  P1 = ((id >> 1) & 1) ^ ((id >> 3) & 1) ^ ((id >> 4) & 1) ^ ((id >> 5) & 1);
+  P1 = ~P1;
+  id = id | ((P0 & 1) << 6);
+  id = id | ((P1 & 1) << 7);
+  printf("the id %d \n\r", id);
+  return id;
+}
+
 /**
  * \brief  
  *
@@ -124,7 +125,7 @@ void Lin_CalculateChecksum(LinSync* sync)
  */
 void Lin_Init ( const LinConfigType* Config)
 {
-  LinState = SEND_IDLE;
+  LinState = IDLE;
     
   LinNumChannels = Config->LinNumberOfChannels;
   
@@ -151,10 +152,7 @@ void Lin_Init ( const LinConfigType* Config)
    
   Uart_Init(&UartCfg[0]);
 }
-
-
-
-   
+     
 /**
  * \brief 
  *
@@ -177,6 +175,8 @@ Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
   		DataSentCtrlCounter = 0; -> Will handle the data to be sent if a master response, or to store the data in the corresponding order if a slave response
   		
   	  */
+      LinFramePidType PID;
+      PID = Lin_CalculatePID(LinPid);
   	  LinState = SEND_BREAK;
   	  Lin_StateHandler();
     }

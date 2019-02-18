@@ -51,7 +51,7 @@ uint8_t stateBuffLin = 0;
 void LinCtrl_2ms( void )
 {
    LinPduType pduInfo = {
-      0,
+      9,
       LIN_ENHANCED_CS,
       LIN_MASTER_RESPONSE,
       14,
@@ -74,7 +74,7 @@ void LinCtrl_50ms( void )
 void LinCtrl_100ms( void )
 {
   LinPduType pduInfo = {
-      0,
+      5,
       LIN_CLASSIC_CS,
       LIN_SLAVE_RESPONSE,
       15,
