@@ -31,6 +31,7 @@ LinStateType LinState;
 
 LinFrameResponseType currentResponse;
 uint8_t DataSentCtrlCounter = 0;
+uint8_t DataReceivedCtrlCounter = 0;
 uint8_t* SduData;
 uint8_t CS;
 
@@ -94,7 +95,8 @@ void Lin_StateHandler( void ){
         {
           Uart_SendByte(0,CS);
           DataSentCtrlCounter = 0;
-          LinState = SEND_IDLE;
+          Uart_EnableInt(0, UART_CFG_INT_RXRDY, 1);
+          Uart_EnableInt(0, UART_CFG_INT_TXRDY, 0);
         }
       }
       else
@@ -247,6 +249,17 @@ Std_ReturnType Lin_GetSlaveResponse ( uint8_t Channel, uint8_t** LinSduPtr )
      * check pid
      * check checksum
      * **/
+  if (DataReceivedCtrlCounter < SduDataLength )
+  {
+    *LinSduPtr[DataReceivedCtrlCounter] = Uart_GetByte(0);
+    DataReceivedCtrlCounter++;
+  }
+  else
+  {
+    Uart_EnableInt(0, UART_CFG_INT_RXRDY, 0);
+    printf(*LinSduPtr);
+    LinState = SEND_IDLE;
+  }
 }
 
 /**
