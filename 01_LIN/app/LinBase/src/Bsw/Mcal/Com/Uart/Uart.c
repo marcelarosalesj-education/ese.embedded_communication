@@ -334,19 +334,19 @@ void Uart_Isr( uint8_t Channel )
   
   uint32_t statusRegister = UartRegAddr[Channel]->UART_IMR & UartRegAddr[Channel]->UART_SR;
   
-   if(( statusRegister & UART_MASK_RXRDY ) && (UartStatus[LocUartLogicChannel].rx_callback != NULL)){
+   if(( statusRegister & UART_MASK_RXRDY ) /*&& (UartStatus[LocUartLogicChannel].rx_callback != NULL)*/){
      UartStatus[LocUartLogicChannel].rx_callback();
    }
-   if((statusRegister & UART_MASK_TXRDY) && (UartStatus[LocUartLogicChannel].tx_callback != NULL)){
+   if((statusRegister & UART_MASK_TXRDY) /*&& (UartStatus[LocUartLogicChannel].tx_callback != NULL)*/){
      UartStatus[LocUartLogicChannel].tx_callback();
    }
-   if((statusRegister & UART_MASK_OVRE) && (UartStatus[LocUartLogicChannel].error_callback != NULL)){
+   if((statusRegister & UART_MASK_OVRE) /*&& (UartStatus[LocUartLogicChannel].error_callback != NULL)*/){
      UartStatus[LocUartLogicChannel].error_callback(UART_ERROR_OVERRUN);
    }
-   if((statusRegister & UART_MASK_FRAME) && (UartStatus[LocUartLogicChannel].error_callback != NULL)){
+   if((statusRegister & UART_MASK_FRAME) /*&& (UartStatus[LocUartLogicChannel].error_callback != NULL)*/){
      UartStatus[LocUartLogicChannel].error_callback(UART_ERROR_FRAMING);
    }
-   if((statusRegister & UART_MASK_PARE) && (UartStatus[LocUartLogicChannel].error_callback != NULL)){
+   if((statusRegister & UART_MASK_PARE) /*&& (UartStatus[LocUartLogicChannel].error_callback != NULL)*/){
      UartStatus[LocUartLogicChannel].error_callback(UART_ERROR_PARITY);
    }
   

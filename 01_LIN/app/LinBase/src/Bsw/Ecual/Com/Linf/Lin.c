@@ -22,18 +22,23 @@
 * Definition of  VARIABLEs - 
 *****************************************************************************************************/
 
-uint8_t PduLinPid = 0;
-LinFrameDlType SduDataLength = 0;
-uint8_t LinNumChannels;
-uint8_t LinChannelId;
-uint32_t LinBaudrate;
-LinStateType LinState;
+/* Frame's variables local for the Lin Module */
+uint8_t Lin_Channel = 0;
+LinFramePidType Lin_ID = 0;
+LinFramePidType Lin_PID;
+uint8_t Lin_CS = 0;
+LinFrameCsModelType Lin_ChecksumType;
+LinFrameResponseType Lin_ResponseType;
+LinFrameDlType Lin_SduDataLength = 0;
+uint8_t Lin_SduData[50];
 
-LinFrameResponseType currentResponse;
+/* Variables for the Lin Module */
+uint8_t LinNumChannels;
+LinStateType LinState;
 uint8_t DataSentCtrlCounter = 0;
-uint8_t DataReceivedCtrlCounter = 0;
-uint8_t* SduData;
-uint8_t CS;
+uint8_t wait_for_response = 1;
+uint8_t **Get_LinSduPtr;
+Std_ReturnType ReturnCode = 0;
 
 /*****************************************************************************************************
 * Definition of module wide (CONST-) CONSTANTs 
@@ -52,96 +57,124 @@ uint8_t CS;
  *
  *  \param
  */
-void Lin_StateHandler( void ){
-	switch(LinState){
-		case SEND_IDLE:
-		  /* Ensure ISR's used are disabled */
-		  /* Enabling-Disabling Rx and Tx interrupts has to be handled accordingly */
-		  Uart_EnableInt(0, UART_CFG_INT_RXRDY, 0);
-		  Uart_EnableInt(0, UART_CFG_INT_TXRDY, 0);
-		  break;
-		case SEND_BREAK:
-		  Uart_SendByte(0,0x00);
-		  Uart_EnableInt(0, UART_CFG_INT_TXRDY, 1);
-		  LinState = SEND_SYNC;
-      Lin_StateHandler();
-		  break;
-		case SEND_SYNC:
-		  Uart_SendByte(0,0x55);
-		  LinState = SEND_PID;
-      Lin_StateHandler();
-		  break;
-		case SEND_PID:
-		  /* For the Lin project, you might need to calculate the PID */
-		  Uart_SendByte(0, PduLinPid);
-		  LinState = SEND_RESPONSE;
-      
-      currentResponse = LIN_MASTER_RESPONSE;
-		  /*
-			For the project you need to consider if you will wait for a response or will send a response, there fore LinState should be changed accordingly. 
-			e.g. LinState = SEND_RESPONSE or LinState = GET_RESPONSE (additional state to handle RX from slaves)
-			If GET_RESPONSE then Tx interrupts should be disabled, and Rx interrupts enabled. Both isr's should call Lin_Isr();
-		  */
-		  break;   
-		case SEND_RESPONSE:
-      if ( currentResponse == LIN_MASTER_RESPONSE)
-      {
-        if (DataSentCtrlCounter < SduDataLength )
+void Lin_StateHandler(void)
+{
+    switch (LinState)
+    {
+    case SEND_IDLE:
+        /* Ensure ISR's used are disabled */
+        /* Enabling-Disabling Rx and Tx interrupts has to be handled accordingly */
+        Uart_EnableInt(Lin_Channel, UART_CFG_INT_RXRDY, 0);
+        Uart_EnableInt(Lin_Channel, UART_CFG_INT_TXRDY, 0);
+        break;
+    case SEND_BREAK:
+        ReturnCode = Uart_SendByte(Lin_Channel, 0x00);
+        if (ReturnCode == E_NOT_OK)
         {
-          Uart_SendByte(0, SduData[DataSentCtrlCounter]);
-          DataSentCtrlCounter++;
+            printf("Error with transmission\n\r");
+            LinState = SEND_IDLE;
+            break;
+        }
+        LinState = SEND_SYNC;
+        Lin_StateHandler();
+        break;
+    case SEND_SYNC:
+        ReturnCode = Uart_SendByte(Lin_Channel, 0x55);
+        if (ReturnCode == E_NOT_OK)
+        {
+            printf("Error with transmission\n\r");
+            LinState = SEND_IDLE;
+            break;
+        }
+        LinState = SEND_PID;
+        Lin_StateHandler();
+        break;
+    case SEND_PID:
+        /*
+            For the project you need to consider if you will wait for a
+            response or will send a response,
+            there fore LinState should be changed accordingly.
+            e.g. LinState = SEND_RESPONSE or LinState = GET_RESPONSE
+            (additional state to handle RX from slaves)
+            If GET_RESPONSE then Tx interrupts should be disabled,
+            and Rx interrupts enabled. Both isr's should call Lin_Isr();
+            */
+        ReturnCode = Uart_SendByte(Lin_Channel, Lin_PID);
+        if (ReturnCode == E_NOT_OK)
+        {
+            printf("Error with transmission\n\r");
+            LinState = SEND_IDLE;
+            break;
+        }
+
+        if (Lin_ResponseType == LIN_MASTER_RESPONSE)
+        {
+            LinState = SEND_RESPONSE;
+        }
+        else if (Lin_ResponseType == LIN_SLAVE_RESPONSE)
+        {
+            LinState = GET_RESPONSE;
+            Uart_EnableInt(Lin_Channel, UART_CFG_INT_RXRDY, 1);
+            Uart_EnableInt(Lin_Channel, UART_CFG_INT_TXRDY, 0);
+        }
+        Lin_StateHandler();
+        break;
+    case SEND_RESPONSE:
+        if (DataSentCtrlCounter < Lin_SduDataLength)
+        {
+            ReturnCode = Uart_SendByte(Lin_Channel, Lin_SduData[DataSentCtrlCounter]);
+            if (ReturnCode == E_NOT_OK)
+            {
+                printf("Error with transmission\n\r");
+                LinState = SEND_IDLE;
+                break;
+            }
+            DataSentCtrlCounter++;
         }
         else
         {
-          Uart_SendByte(0,CS);
-          DataSentCtrlCounter = 0;
-          Uart_EnableInt(0, UART_CFG_INT_RXRDY, 1);
-          Uart_EnableInt(0, UART_CFG_INT_TXRDY, 0);
+            ReturnCode = Uart_SendByte(Lin_Channel, Lin_CS);
+            if (ReturnCode == E_NOT_OK)
+            {
+                printf("Error with transmission\n\r");
+                LinState = SEND_IDLE;
+                break;
+            }
+            DataSentCtrlCounter = 0;
+            Uart_EnableInt(Lin_Channel, UART_CFG_INT_RXRDY, 1);
+            Uart_EnableInt(Lin_Channel, UART_CFG_INT_TXRDY, 0);
         }
-      }
-      else
-      {
-        Lin_GetSlaveResponse(0, &SduData);
-      }      
-		  break; 
-		default: /* Should not be reached */
-		  break;
-  }          
+        break;
+    case GET_RESPONSE:
+        Lin_GetSlaveResponse(Lin_Channel, (uint8_t **)&Lin_SduData);
+        break;
+    default: /* Should not be reached */
+        break;
+    }
 }
 
-uint8_t Lin_CalculateChecksum(LinFrameCsModelType CStype, LinFramePidType pid, uint8_t * Data, uint8_t length)
+uint8_t Lin_CalculateChecksum(LinFrameCsModelType CStype, LinFramePidType pid, uint8_t *Data, uint8_t length)
 {
-    printf(Data);
-    printf("\n\r");
-
     /* Sum all Data */
     uint16_t sum = 0;
     uint8_t index = 0;
-    for(index = 0; index < length; index++)
+    for (index = 0; index < length; index++)
     {
-      sum += Data[index];
+        sum += Data[index];
     }
 
     /* Add Pid if it is an Enhanced Checksum */
-    if(CStype == LIN_CLASSIC_CS)
+    if (CStype == LIN_ENHANCED_CS)
     {
-      /* do nothing */
-    }
-    else if (CStype == LIN_ENHANCED_CS)
-    {
-      sum += pid;
-    }
-    else
-    {
-      /*Invalid Checksum Type*/
+        sum += pid;
     }
 
     /* Handle Carry */
-    if (sum >= 0x0100 )
+    if (sum >= 0x0100)
     {
-      uint8_t low = (sum & 0x00FF);
-      uint8_t high = (sum & 0xFF00) >> 8;
-      sum = low + high;
+        uint8_t low = (sum & 0x00FF);
+        uint8_t high = (sum & 0xFF00) >> 8;
+        sum = low + high;
     }
 
     /* One's complement */
@@ -155,15 +188,15 @@ uint8_t Lin_CalculateChecksum(LinFrameCsModelType CStype, LinFramePidType pid, u
 
 LinFramePidType Lin_CalculatePID(LinFramePidType id)
 {
-  uint8_t P0;
-  uint8_t P1;
-  P0 = ((id >> 0) & 1) ^ ((id >> 1) & 1) ^ ((id >> 2) & 1) ^ ((id >> 4) & 1);
-  P1 = ((id >> 1) & 1) ^ ((id >> 3) & 1) ^ ((id >> 4) & 1) ^ ((id >> 5) & 1);
-  P1 = ~P1;
-  id = id | ((P0 & 1) << 6);
-  id = id | ((P1 & 1) << 7);
-  printf("the id %d \n\r", id);
-  return id;
+    uint8_t P0;
+    uint8_t P1;
+    P0 = ((id >> 0) & 1) ^ ((id >> 1) & 1) ^ ((id >> 2) & 1) ^ ((id >> 4) & 1);
+    P1 = ((id >> 1) & 1) ^ ((id >> 3) & 1) ^ ((id >> 4) & 1) ^ ((id >> 5) & 1);
+    P1 = ~P1;
+    id = id | ((P0 & 1) << 6);
+    id = id | ((P1 & 1) << 7);
+    printf("the id %d \n\r", id);
+    return id;
 }
 
 /**
@@ -171,36 +204,36 @@ LinFramePidType Lin_CalculatePID(LinFramePidType id)
  *
  *  \param 
  */
-void Lin_Init ( const LinConfigType* Config)
+void Lin_Init(const LinConfigType *Config)
 {
-  LinState = IDLE;
-    
-  LinNumChannels = Config->LinNumberOfChannels;
-  
-  UartChannelType UartChannelConfig[LinNumChannels];
-  int i=0;
-  for(i = 0; i < LinNumChannels; i++) {
-     UartChannelConfig[i].ChannelId = Config->LinChannel[i].LinChannelId;;
-     UartChannelConfig[i].IsrEn = UART_CFG_INT_OVR_ERROR;
-     UartChannelConfig[i].Mode = UART_CFG_MODE_LOOPBACK;
-     UartChannelConfig[i].Parity = UART_CFG_PARITY_NO;
-     UartChannelConfig[i].Baudrate = Config->LinChannel[i].LinChannelBaudrate;;
-     UartChannelConfig[i].TxNotification = NULL;
-     UartChannelConfig[i].RxNotification = NULL;
-     UartChannelConfig[i].ErrorNotification = NULL;
-  }
-  
-  UartConfigType UartCfg[] = { 
+    LinState = IDLE;
+
+    LinNumChannels = Config->LinNumberOfChannels;
+
+    UartChannelType UartChannelConfig[LinNumChannels];
+    int i = 0;
+    for (i = 0; i < LinNumChannels; i++)
     {
-      sizeof(UartChannelConfig)/sizeof(UartChannelType), //number of channels
-      UART_CFG_PER_CLK,
-      &UartChannelConfig[0]
+        UartChannelConfig[i].ChannelId = Config->LinChannel[i].LinChannelId;
+        ;
+        UartChannelConfig[i].IsrEn = UART_CFG_INT_TXRDY;
+        UartChannelConfig[i].Mode = UART_CFG_MODE_LOOPBACK;
+        UartChannelConfig[i].Parity = UART_CFG_PARITY_NO;
+        UartChannelConfig[i].Baudrate = Config->LinChannel[i].LinChannelBaudrate;
+        ;
+        UartChannelConfig[i].TxNotification = Lin_Isr;
+        UartChannelConfig[i].RxNotification = Lin_Isr;
+        UartChannelConfig[i].ErrorNotification = NULL;
     }
-  } ;
-   
-  Uart_Init(&UartCfg[0]);
+
+    UartConfigType UartCfg[] = {
+        {sizeof(UartChannelConfig) / sizeof(UartChannelType), //number of channels
+         UART_CFG_PER_CLK,
+         &UartChannelConfig[0]}};
+
+    Uart_Init(&UartCfg[0]);
 }
-     
+
 /**
  * \brief 
  *
@@ -208,66 +241,56 @@ void Lin_Init ( const LinConfigType* Config)
  *  \param PduInfoPtr
  *  \return E_OK: Command successfuly executed.
  */
-Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
+
+Std_ReturnType Lin_SendFrame(uint8_t Channel, LinPduType *PduInfoPtr)
 {
-    if( LinState == IDLE){
-      PduLinPid = PduInfoPtr->Pid;
-      SduDataLength = PduInfoPtr->Dl;
-      LinFrameCsModelType ChecksumType = PduInfoPtr->Cs;
+    if (LinState == IDLE)
+    {
+        uint8_t SduIdx = 0;
+        /* Copy variables from structure to global variables of this LIN module */
+        Lin_Channel = Channel;
+        Lin_ID = PduInfoPtr->Pid;
+        Lin_PID = Lin_CalculatePID(Lin_ID);
+        Lin_SduDataLength = PduInfoPtr->Dl;
+        for (SduIdx = 0; SduIdx < Lin_SduDataLength; SduIdx++)
+        {
+            Lin_SduData[SduIdx] = PduInfoPtr->SduPtr[SduIdx];
+        }
+        Lin_ChecksumType = PduInfoPtr->Cs;
+        Lin_CS = Lin_CalculateChecksum(Lin_ChecksumType, Lin_PID, Lin_SduData, Lin_SduDataLength); /* Checksum is calculated on the PID, with parity */
+        Lin_ResponseType = PduInfoPtr->Drc;
 
-      uint8_t SduIdx = 0;
-      for (SduIdx = 0; SduIdx < SduDataLength; SduIdx++)
-      {
-        SduData[SduIdx] = PduInfoPtr->SduPtr[SduIdx];
-      }
+        /* Print information */
+        printf("Data is: %s\n\r", Lin_SduData);
+        printf("PID is: %d\n\r", Lin_PID);
+        printf("Data Length is: %d\n\r", Lin_SduDataLength);
+        printf("Checksum is: %x\n\r", Lin_CS);
 
-      LinFramePidType PID;
-      PID = Lin_CalculatePID(PduLinPid);
-      printf("PID is %d\n\r", PID);
-
-      printf("Data Length is %d\n\r", SduDataLength);
-      CS = Lin_CalculateChecksum(ChecksumType, PID, SduData, SduDataLength); /* Checksum is calculated on the PID, with parity */
-      printf("Checksum is %x\n\r", CS);
-      LinState = SEND_BREAK;
-  	  Lin_StateHandler();
+        LinState = SEND_BREAK;
+        Lin_StateHandler();
     }
-    else{
-      /*Command not accepted*/
+    else
+    {
+        /*Command not accepted*/
     }
 }
 
-
 /**
- * \brief 
+ * \brief
  *
- *  \param Channel  
+ *  \param Channel
  *  \param LinSduPtr
  */
-Std_ReturnType Lin_GetSlaveResponse ( uint8_t Channel, uint8_t** LinSduPtr )
+Std_ReturnType Lin_GetSlaveResponse(uint8_t Channel, uint8_t **LinSduPtr)
 {
-    /**receive response
-     * check pid
-     * check checksum
-     * **/
-  if (DataReceivedCtrlCounter < SduDataLength )
-  {
-    *LinSduPtr[DataReceivedCtrlCounter] = Uart_GetByte(0);
-    DataReceivedCtrlCounter++;
-  }
-  else
-  {
-    Uart_EnableInt(0, UART_CFG_INT_RXRDY, 0);
-    printf(*LinSduPtr);
-    LinState = SEND_IDLE;
-  }
+    uint8_t rxVal = Uart_GetByte(Channel);
 }
 
 /**
- * \brief 
+ * \brief
  *
  */
 void Lin_Isr(void)
 {
-   Lin_StateHandler();   
+    Lin_StateHandler();
 }
-
