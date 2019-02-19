@@ -29,6 +29,11 @@ uint8_t LinChannelId;
 uint32_t LinBaudrate;
 LinStateType LinState;
 
+LinFrameResponseType currentResponse;
+uint8_t DataSentCtrlCounter = 0;
+uint8_t* SduData;
+uint8_t CS;
+
 /*****************************************************************************************************
 * Definition of module wide (CONST-) CONSTANTs 
 *****************************************************************************************************/
@@ -69,6 +74,8 @@ void Lin_StateHandler( void ){
 		  /* For the Lin project, you might need to calculate the PID */
 		  Uart_SendByte(0, PduLinPid);
 		  LinState = SEND_RESPONSE;
+      
+      currentResponse = LIN_MASTER_RESPONSE;
 		  /*
 			For the project you need to consider if you will wait for a response or will send a response, there fore LinState should be changed accordingly. 
 			e.g. LinState = SEND_RESPONSE or LinState = GET_RESPONSE (additional state to handle RX from slaves)
@@ -76,25 +83,24 @@ void Lin_StateHandler( void ){
 		  */
 		  break;   
 		case SEND_RESPONSE:
-		  
-		  /* 
-			In your project, the number of data will be sent according to the data lenght from the PDU information, therefore a sub-state machine should be considered, or to handle here each byte sent. e.g.
-			If ( LinResponseType == MASTER_RESPONSE)
-			{
-				If (DataSentCtrlCounter < SduDataLength )
-				{
-					Uart_SendByte(0,SduData[DataSentCtrlCounter]);
-					DataSentCtrlCounter++;
-					-> Need to calculate Checksum to be sent
-				}
-				else
-				{
-					Uart_SendByte(0,LinChecksum);
-					DataSentCtrlCounter = 0;
-					LinState = IDLE;
-				}
-			}
-		  */
+      if ( currentResponse == LIN_MASTER_RESPONSE)
+      {
+        if (DataSentCtrlCounter < SduDataLength )
+        {
+          Uart_SendByte(0, SduData[DataSentCtrlCounter]);
+          DataSentCtrlCounter++;
+        }
+        else
+        {
+          Uart_SendByte(0,CS);
+          DataSentCtrlCounter = 0;
+          LinState = SEND_IDLE;
+        }
+      }
+      else
+      {
+        Lin_GetSlaveResponse(0, &SduData);
+      }      
 		  break; 
 		default: /* Should not be reached */
 		  break;
@@ -208,15 +214,12 @@ Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
       LinFrameCsModelType ChecksumType = PduInfoPtr->Cs;
 
       uint8_t SduIdx = 0;
-      uint8_t SduData[SduDataLength];
       for (SduIdx = 0; SduIdx < SduDataLength; SduIdx++)
       {
         SduData[SduIdx] = PduInfoPtr->SduPtr[SduIdx];
       }
 
-      uint8_t DataSentCtrlCounter = 0;
       LinFramePidType PID;
-      uint8_t CS;
       PID = Lin_CalculatePID(PduLinPid);
       printf("PID is %d\n\r", PID);
 
@@ -240,7 +243,10 @@ Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
  */
 Std_ReturnType Lin_GetSlaveResponse ( uint8_t Channel, uint8_t** LinSduPtr )
 {
-
+    /**receive response
+     * check pid
+     * check checksum
+     * **/
 }
 
 /**
