@@ -51,14 +51,14 @@ uint8_t LedBlinkingHalt = 0;
 */
 void LedCtrl_Configure( void )
 {
-	LED_Configure( 0 ) ;
-	LED_Configure( 1 ) ;
+    LED_Configure( 0 ) ;
+    LED_Configure( 1 ) ;
 }
 
 /*****************************************************************************************************/
 /**
 * \brief    Turn a combination of 2 LEDs with a unique blinking pattern.
-			Call this function periodically @ 10ms to operate
+            Call this function periodically @ 10ms to operate
 * \author   Abraham Tezmol
 * \param    void
 * \return   void
@@ -66,7 +66,7 @@ void LedCtrl_Configure( void )
 void LedCtrl_BlinkingPattern(void)
 {
 /* Global state machine status for LED flashing control  */
-	static uint8_t LocPatternIndex;
+    static uint8_t LocPatternIndex;
 
     LocPatternIndex++;
     if (LedBlinkingHalt)

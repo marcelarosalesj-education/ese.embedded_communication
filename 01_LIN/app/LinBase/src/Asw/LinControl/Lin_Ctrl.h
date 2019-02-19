@@ -8,8 +8,8 @@
 */
 /****************************************************************************************************/
 
-#ifndef __UART_CTRL_H        /*prevent duplicated includes*/
-#define __UART_CTRL_H
+#ifndef __LIN_CTRL_H        /*prevent duplicated includes*/
+#define __LIN_CTRL_H
 
 /*****************************************************************************************************
 * Include files
@@ -46,4 +46,4 @@ extern void LinCtrl_TriggerEvent( void );
 
 /**************************************************************************************************/
 
-#endif /* __UART_CTRL_H */
+#endif /* __LIN_CTRL_H */

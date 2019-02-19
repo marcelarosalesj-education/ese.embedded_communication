@@ -26,11 +26,6 @@
 /****************************************************************************************************
 * Definition of module wide MACROs / #DEFINE-CONSTANTs 
 *****************************************************************************************************/
-#define LIN0_ctrl 0
-#define LIN1_ctrl 1
-#define LIN2_ctrl 2
-#define LIN3_ctrl 3
-#define LIN4_ctrl 4
 
 /***************************************************************************************************
 * Declaration of module wide TYPEs 
@@ -40,8 +35,8 @@
 * Definition of module wide (CONST-) CONSTANTs 
 *****************************************************************************************************/
 
-uint8_t messageBuffLin1[] = "Segundo Mensaje";
-uint8_t messageBuffLin2[] = "ABCD";
+uint8_t messageBuffLin1[] = "ABCD";
+uint8_t messageBuffLin2[] = "Segundo Mensaje";
 uint8_t stateBuffLin = 0;
 
 /****************************************************************************************************
@@ -52,7 +47,7 @@ void LinCtrl_2ms( void )
 {
    LinPduType pduInfo = {
       9,
-      LIN_CLASSIC_CS,
+      LIN_ENHANCED_CS,
       LIN_MASTER_RESPONSE,
       sizeof(messageBuffLin1)-1, /* minus one to remove the null termination character */
       &messageBuffLin1[0],

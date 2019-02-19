@@ -335,8 +335,8 @@ __STATIC_INLINE void TCM_Disable(void)
  */
 void Reset_Handler(void)
 {
-	    uint32_t *pSrc, *pDest;
-        uint8_t *u8dst;
+    uint32_t *pSrc, *pDest;
+    uint8_t *u8dst;
 
 		/* Initialize the relocate segment */
 		pSrc = &_etext;

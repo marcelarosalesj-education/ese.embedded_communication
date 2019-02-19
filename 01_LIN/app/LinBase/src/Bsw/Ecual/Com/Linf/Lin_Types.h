@@ -15,7 +15,7 @@
   /** Standard Types */
   #include "Std_Types.h"
   #include "Uart_Types.h"
-  
+    
   typedef uint8_t LinFramePidType;
 
   typedef enum 

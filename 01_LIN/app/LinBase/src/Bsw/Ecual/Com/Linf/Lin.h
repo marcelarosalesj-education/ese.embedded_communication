@@ -23,7 +23,8 @@
     SEND_SYNC,     
     SEND_PID,      
     SEND_RESPONSE,
-    SEND_IDLE,      
+    SEND_IDLE,
+    GET_RESPONSE
   }LinStateType;
 
   void Lin_Init ( const LinConfigType* Config);
