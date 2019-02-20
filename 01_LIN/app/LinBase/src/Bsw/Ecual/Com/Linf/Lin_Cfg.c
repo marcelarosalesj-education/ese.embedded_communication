@@ -23,6 +23,6 @@ LinChannelType LinCh[] = {
 };
 
 LinConfigType LinChannelConfig[] = {
-  sizeof(LinCh)/sizeof(LinChannelType), //number of channels
+  sizeof(LinCh)/sizeof(LinChannelType), /* number of channels */
   &LinCh[0],
 };

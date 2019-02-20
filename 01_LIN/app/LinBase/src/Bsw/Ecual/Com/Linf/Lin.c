@@ -32,15 +32,14 @@ LinFrameResponseType Lin_ResponseType;
 LinFrameDlType Lin_SduDataLength = 0;
 uint8_t Lin_SduData[50];
 
-
+Std_ReturnType Lin_Frame_ReturnCode = E_NOT_OK;
 
 /* Variables for the Lin Module */
 uint8_t LinNumChannels;
 LinStateType LinState;
 uint8_t DataSentCtrlCounter = 0;
-uint8_t wait_for_response = 1;
 uint8_t ** Get_LinSduPtr;
-Std_ReturnType ReturnCode = 0;
+Std_ReturnType ReturnCode = E_NOT_OK;
 
 
 /*****************************************************************************************************
@@ -67,24 +66,27 @@ void Lin_StateHandler( void ){
             /* Enabling-Disabling Rx and Tx interrupts has to be handled accordingly */
             Uart_EnableInt(Lin_Channel, UART_CFG_INT_RXRDY, 0);
             Uart_EnableInt(Lin_Channel, UART_CFG_INT_TXRDY, 0);
+            LinState = IDLE;
             break;
         case SEND_BREAK:
+            ReturnCode = E_OK;
             ReturnCode = Uart_SendByte(Lin_Channel,0x00);
             if(ReturnCode == E_NOT_OK)
             {
-                printf("Error with transmission\n\r");
-                LinState = SEND_IDLE;
+                printf("Break Error\n\r");
+                LinState = IDLE;
                 break;
             }
             LinState = SEND_SYNC;
             Lin_StateHandler();
             break;
         case SEND_SYNC:
+            ReturnCode = E_OK;
             ReturnCode = Uart_SendByte(Lin_Channel,0x55);
             if(ReturnCode == E_NOT_OK)
             {
-                printf("Error with transmission\n\r");
-                LinState = SEND_IDLE;
+                printf("Sync Error\n\r");
+                LinState = IDLE;
                 break;
             }
             LinState = SEND_PID;
@@ -100,11 +102,12 @@ void Lin_StateHandler( void ){
             If GET_RESPONSE then Tx interrupts should be disabled,
             and Rx interrupts enabled. Both isr's should call Lin_Isr();
             */
+            ReturnCode = E_OK;
             ReturnCode = Uart_SendByte(Lin_Channel, Lin_PID);
             if(ReturnCode == E_NOT_OK)
             {
-                printf("Error with transmission\n\r");
-                LinState = SEND_IDLE;
+                printf("PID Error\n\r");
+                LinState = IDLE;
                 break;
             }
 
@@ -121,26 +124,40 @@ void Lin_StateHandler( void ){
             Lin_StateHandler();
             break;
         case SEND_RESPONSE:
-              /*
-                In your project, the number of data will be sent according to the data lenght from the PDU information, therefore a sub-state machine should be considered, or to handle here each byte sent. e.g.
-                If ( LinResponseType == MASTER_RESPONSE)
+            if(Lin_ResponseType == LIN_MASTER_RESPONSE)
+            {
+                if(DataSentCtrlCounter < Lin_SduDataLength)
                 {
-                    If (DataSentCtrlCounter < SduDataLength )
+                    ReturnCode = E_OK;
+                    ReturnCode = Uart_SendByte(Lin_Channel, Lin_SduData[DataSentCtrlCounter]);
+                    if(ReturnCode == E_NOT_OK)
                     {
-                        Uart_SendByte(0,SduData[DataSentCtrlCounter]);
-                        DataSentCtrlCounter++;
-                        -> Need to calculate Checksum to be sent
-                    }
-                    else
-                    {
-                        Uart_SendByte(0,LinChecksum);
-                        DataSentCtrlCounter = 0;
+                        printf("Response Error\n\r");
                         LinState = IDLE;
+                        break;
                     }
+                    DataSentCtrlCounter++;
                 }
-              */
+                else
+                {
+                    ReturnCode = E_OK;
+                    ReturnCode = Uart_SendByte(Lin_Channel, Lin_CS);
+                    if(ReturnCode == E_NOT_OK)
+                    {
+                        printf("Checksum Error\n\r");
+                        LinState = IDLE;
+                        break;
+                    }
+                    DataSentCtrlCounter = 0;
+                    Lin_Frame_ReturnCode = E_OK;
+                    LinState = IDLE;
+                }
+            }
+            Lin_StateHandler();
             break;
         case GET_RESPONSE:
+        break;
+        case IDLE:
         break;
         default: /* Should not be reached */
         break;
@@ -189,7 +206,6 @@ LinFramePidType Lin_CalculatePID(LinFramePidType id)
   P1 = ~P1;
   id = id | ((P0 & 1) << 6);
   id = id | ((P1 & 1) << 7);
-  printf("the id %d \n\r", id);
   return id;
 }
 
@@ -200,14 +216,15 @@ LinFramePidType Lin_CalculatePID(LinFramePidType id)
  */
 void Lin_Init ( const LinConfigType* Config)
 {
-  LinState = IDLE;
+  LinState = SEND_IDLE;
+  Lin_StateHandler();
     
   LinNumChannels = Config->LinNumberOfChannels;
   
   UartChannelType UartChannelConfig[LinNumChannels];
   int i=0;
   for(i = 0; i < LinNumChannels; i++) {
-     UartChannelConfig[i].ChannelId = Config->LinChannel[i].LinChannelId;;
+     UartChannelConfig[i].ChannelId = Config->LinChannel[i].LinChannelId;
      UartChannelConfig[i].IsrEn = UART_CFG_INT_OVR_ERROR;
      UartChannelConfig[i].Mode = UART_CFG_MODE_LOOPBACK;
      UartChannelConfig[i].Parity = UART_CFG_PARITY_NO;
@@ -238,6 +255,7 @@ void Lin_Init ( const LinConfigType* Config)
 
 Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
 {
+    Lin_Frame_ReturnCode = E_NOT_OK;
     if( LinState == IDLE){
         uint8_t SduIdx = 0;
         /* Copy variables from structure to global variables of this LIN module */
@@ -249,21 +267,21 @@ Std_ReturnType Lin_SendFrame ( uint8_t Channel, LinPduType* PduInfoPtr )
         {
         Lin_SduData[SduIdx] = PduInfoPtr->SduPtr[SduIdx];
         }
+        DataSentCtrlCounter = 0;
         Lin_ChecksumType = PduInfoPtr->Cs;
         Lin_CS = Lin_CalculateChecksum(Lin_ChecksumType, Lin_PID, Lin_SduData, Lin_SduDataLength); /* Checksum is calculated on the PID, with parity */
         Lin_ResponseType = PduInfoPtr->Drc;
-
         /* Print information */
         printf("Data is: %s\n\r", Lin_SduData);
-        printf("PID is: %d\n\r", Lin_PID);
+        printf("PID is: %x\n\r", Lin_PID);
         printf("Data Length is: %d\n\r", Lin_SduDataLength);
         printf("Checksum is: %x\n\r", Lin_CS);
-
         LinState = SEND_BREAK;
         Lin_StateHandler();
     } else{
         /*Command not accepted*/
     }
+    return Lin_Frame_ReturnCode;
 }
 
 
