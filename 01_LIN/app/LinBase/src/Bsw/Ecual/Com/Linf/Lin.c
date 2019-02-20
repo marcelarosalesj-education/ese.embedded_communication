@@ -76,7 +76,7 @@ void Lin_StateHandler(void)
             break;
         }
         LinState = SEND_SYNC;
-        Lin_StateHandler();
+        // Lin_StateHandler();
         break;
     case SEND_SYNC:
         ReturnCode = Uart_SendByte(Lin_Channel, 0x55);
@@ -87,7 +87,7 @@ void Lin_StateHandler(void)
             break;
         }
         LinState = SEND_PID;
-        Lin_StateHandler();
+        // Lin_StateHandler();
         break;
     case SEND_PID:
         /*
@@ -117,7 +117,7 @@ void Lin_StateHandler(void)
             Uart_EnableInt(Lin_Channel, UART_CFG_INT_RXRDY, 1);
             Uart_EnableInt(Lin_Channel, UART_CFG_INT_TXRDY, 0);
         }
-        Lin_StateHandler();
+        // Lin_StateHandler();
         break;
     case SEND_RESPONSE:
         if (DataSentCtrlCounter < Lin_SduDataLength)

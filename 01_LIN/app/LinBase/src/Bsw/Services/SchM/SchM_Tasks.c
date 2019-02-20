@@ -20,18 +20,17 @@
 *****************************************************************************************************/
 
 /** Scheduler function prototypes definitions */
-#include    "SchM_Tasks.h"
-/* LED control definitions */ 
-#include    "Led_Ctrl.h"
+#include "SchM_Tasks.h"
+/* LED control definitions */
+#include "Led_Ctrl.h"
 /* Uart Functions */
-#include    "Uart_Ctrl.h"
+#include "Uart_Ctrl.h"
 /* Lin Functions */
-#include    "Lin_Ctrl.h"
+#include "Lin_Ctrl.h"
 
 /*****************************************************************************************************
 * Definition of  VARIABLEs - 
 *****************************************************************************************************/
-
 
 /*****************************************************************************************************
 * Definition of module wide (CONST-) CONSTANTs 
@@ -42,9 +41,9 @@
 *****************************************************************************************************/
 
 /* List of tasks to be executed @ 1ms */
-void SchM_Task_1ms( void )
+void SchM_Task_1ms(void)
 {
-  SchM_SchedulePoint(); 	
+  SchM_SchedulePoint();
 }
 
 /* List of tasks to be executed @ 2ms, first group */
@@ -54,31 +53,30 @@ void SchM_Task_2ms_A(void)
 }
 
 /* List of tasks to be executed @ 2ms, second group */
-void SchM_Task_2ms_B( void )
+void SchM_Task_2ms_B(void)
 {
-
 }
-    
+
 /* List of tasks to be executed @ 10ms */
-void SchM_Task_10ms( void )
+void SchM_Task_10ms(void)
 {
   LedCtrl_BlinkingPattern();
 }
 
 /* List of tasks to be executed @ 50ms */
-void SchM_Task_50ms( void )
+void SchM_Task_50ms(void)
 {
-	LinCtrl_50ms();
+  LinCtrl_50ms();
 }
 
 /* List of tasks to be executed @ 100ms */
-void SchM_Task_100ms( void )
-{ 
+void SchM_Task_100ms(void)
+{
   LinCtrl_100ms();
 }
 
 /* List of tasks to be executed @ SW0 */
-void SchM_Task_SW0( void )
+void SchM_Task_SW0(void)
 {
   LedCtrl_ToogleBlinkingPattern();
   LinCtrl_100ms();
